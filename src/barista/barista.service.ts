@@ -38,6 +38,7 @@ export class BaristaService{
         this.isAvailable = false;
         this.coffeeAmount -= order.amount
         this.orderNumber = order.orderNumber;
+        this.barmen.emit('send-response', new SendResponseEvent(true))
         const cronJob= this.scheduleRegisty.getCronJob('making-coffee');
         cronJob.start()
 
