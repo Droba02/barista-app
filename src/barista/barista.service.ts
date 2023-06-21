@@ -22,14 +22,15 @@ export class BaristaService{
         this.timePassed++;
     }
 
-    makeOrder(order:{amount:number, time:number, orderNumber : number}): void{
+    makeOrder(order:{amount:number, time:number, orderNumber : number}){
         if(!this.isAvailable){
             this.barmen.emit('send-response', new SendResponseEvent(false))
-            return;
+            return false;
         }
         if((this.coffeeAmount-order.amount) < 0){
             this.refillCoffee()
             this.barmen.emit('send-response', new SendResponseEvent(false))
+            return false;
         }
         
         
