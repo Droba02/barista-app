@@ -4,11 +4,32 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { BaristaModule } from './barista/barista.module';
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+  const app1 = await NestFactory.createMicroservice<MicroserviceOptions>(
     BaristaModule,{
       transport: Transport.TCP,
+      options:{
+        port: 3002
+      }
     }
   )
-  app.listen()
+  const app2 = await NestFactory.createMicroservice<MicroserviceOptions>(
+    BaristaModule,{
+      transport: Transport.TCP,
+      options:{
+        port: 3003
+      }
+    }
+  )
+  const app3 = await NestFactory.createMicroservice<MicroserviceOptions>(
+    BaristaModule,{
+      transport: Transport.TCP,
+      options:{
+        port: 3004
+      }
+    }
+  )
+  app1.listen()
+  app2.listen()
+  app3.listen()
 }
 bootstrap();
