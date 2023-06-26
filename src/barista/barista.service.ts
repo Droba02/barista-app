@@ -8,11 +8,10 @@ import { SuccessfulOrderEvent } from "./successful-order.event";
 
 @Injectable()
 export class BaristaService{
-    
-    constructor(private scheduleRegisty: SchedulerRegistry, @Inject('BARMEN') private barmen: ClientProxy){}
+   
+    constructor(private scheduleRegisty: SchedulerRegistry){}
     private coffeeAmount = 300;
     private timePassed = 0;
-    private isAvailable = true;
     private orderNumber= 0;
     private baristaNumer: number;
 
@@ -27,44 +26,32 @@ export class BaristaService{
 
     makeOrder(order:{amount:number, time:number, orderNumber : number}){
         this.baristaNumer = 1;
-        if(!this.isAvailable){
-            this.barmen.emit('send-response', new SendResponseEvent(false))
-            return false;
-        }
         if((this.coffeeAmount-order.amount) < 0){
             this.refillCoffee()
-            this.barmen.emit('send-response', new SendResponseEvent(false))
-            return false;
+            return 'reffiling';
         }
         
         
         Logger.log(`Barista ${this.baristaNumer} starting on order number: ${order.orderNumber}`)
-        this.isAvailable = false;
         this.coffeeAmount -= order.amount
         this.orderNumber = order.orderNumber;
-        this.barmen.emit('send-response', new SendResponseEvent(true))
         const cronJob= this.scheduleRegisty.getCronJob('making-coffee');
         cronJob.start()
 
         setTimeout(()=>{
             cronJob.stop()
-            
-            this.isAvailable= true;
             Logger.log(`Finished order! Time passed : ${this.timePassed}; coffee left: ${this.coffeeAmount}`)
             this.timePassed = 0;
-            this.barmen.emit('successful-order', new SuccessfulOrderEvent(this.orderNumber))
         },order.time*1000)
     }
 
     refillCoffee(){
         let timeBusy = 2 *10*1000;
         this.coffeeAmount = 300;
-        this.isAvailable = false;
 
         Logger.log(`Barista number ${this.baristaNumer} is refilling coffee`)
 
         setTimeout(() =>{
-            this.isAvailable = true;
             Logger.log(`Barista number ${this.baristaNumer} finished refilling coffee`)
         }, 
         timeBusy);
