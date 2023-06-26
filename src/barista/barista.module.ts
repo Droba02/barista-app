@@ -1,8 +1,9 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { BaristaController } from "./barista.controller";
 import { BaristaService } from "./barista.service";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ClientsModule, Transport } from "@nestjs/microservices";
+import { AppModule } from "src/app.module";
 
 
 @Module({
@@ -13,8 +14,9 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
             options:{
                 port:3001
             }}
-          ])],
+          ]), AppModule],
     providers:[BaristaService],
     controllers:[BaristaController],
 })
-export class BaristaModule{}
+export class BaristaModule{
+}

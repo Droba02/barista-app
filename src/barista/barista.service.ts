@@ -1,28 +1,32 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
-import { ClientProxy } from "@nestjs/microservices";
+import { Inject, Injectable, Logger, NestMiddleware } from "@nestjs/common";
+import { ClientProxy, NestMicroservice } from "@nestjs/microservices";
 import { Cron, SchedulerRegistry } from "@nestjs/schedule";
 import { SendResponseEvent } from "./send-response.event";
 import { SuccessfulOrderEvent } from "./successful-order.event";
 
+
+
 @Injectable()
 export class BaristaService{
-
+    
     constructor(private scheduleRegisty: SchedulerRegistry, @Inject('BARMEN') private barmen: ClientProxy){}
     private coffeeAmount = 300;
     private timePassed = 0;
     private isAvailable = true;
     private orderNumber= 0;
+    private baristaNumer: number;
 
     @Cron('* * * * * *',{
         name : "making-coffee",
         disabled: true
     })
     makingCoffe(){
-        Logger.log(`Barista number x making order number ${this.orderNumber}`)
+        Logger.log(`Barista number ${this.baristaNumer} making order number ${this.orderNumber}`)
         this.timePassed++;
     }
 
     makeOrder(order:{amount:number, time:number, orderNumber : number}){
+        this.baristaNumer = 1;
         if(!this.isAvailable){
             this.barmen.emit('send-response', new SendResponseEvent(false))
             return false;
@@ -34,7 +38,7 @@ export class BaristaService{
         }
         
         
-        Logger.log(`Barista x starting on order number: ${order.orderNumber}`)
+        Logger.log(`Barista ${this.baristaNumer} starting on order number: ${order.orderNumber}`)
         this.isAvailable = false;
         this.coffeeAmount -= order.amount
         this.orderNumber = order.orderNumber;
@@ -57,15 +61,14 @@ export class BaristaService{
         this.coffeeAmount = 300;
         this.isAvailable = false;
 
-        Logger.log(`Barista number x is refilling coffee`)
+        Logger.log(`Barista number ${this.baristaNumer} is refilling coffee`)
 
         setTimeout(() =>{
             this.isAvailable = true;
-            Logger.log(`Barista number x finished refilling coffee`)
+            Logger.log(`Barista number ${this.baristaNumer} finished refilling coffee`)
         }, 
         timeBusy);
 
     }
-
     
 }
